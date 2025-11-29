@@ -1,4 +1,4 @@
-package com.example.holidaykeeper.domain;
+package com.example.holidaykeeper.domain.holiday;
 
 
 import lombok.RequiredArgsConstructor;

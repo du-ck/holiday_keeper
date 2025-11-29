@@ -37,7 +37,7 @@ public class HolidayController {
      * from ~ to 기간, 공휴일 타입 등 추가 필터 자유 확장
      * 결과는 페이징 형태로 응답
      */
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<ResponseData> holidays() throws Exception {
 
         return new ResponseEntity<>(ResponseData.builder()
@@ -67,7 +67,7 @@ public class HolidayController {
      *
      * 특정 연도·국가의 공휴일 레코드 전체 삭제
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{year}/{countryCode}")
     public ResponseEntity<ResponseData> delete() throws Exception {
 
         return new ResponseEntity<>(ResponseData.builder()
