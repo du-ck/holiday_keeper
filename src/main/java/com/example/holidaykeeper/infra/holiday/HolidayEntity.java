@@ -1,12 +1,13 @@
 package com.example.holidaykeeper.infra.holiday;
 
-import com.example.holidaykeeper.domain.holiday.HolidayType;
-import com.example.holidaykeeper.infra.country.CountryEntity;
+import com.example.holidaykeeper.domain.holiday.Country;
+import com.example.holidaykeeper.domain.holiday.Holiday;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @Table(name = "holiday",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_holiday",
-                columnNames = {"country_code", "holiday_date", "eng_name"}
+                columnNames = {"country_code", "holiday_date", "eng_name", "local_name", "is_deleted"}
         ))
 public class HolidayEntity {
     @Id
@@ -27,11 +28,11 @@ public class HolidayEntity {
     @Column(name = "holiday_date", nullable = false)
     private LocalDate holidayDate;
 
-    @Column(name = "year_value", insertable = false, updatable = false)
-    private Integer year_value;
+    @Column(name = "year_value")
+    private Integer year;
 
-    @Column(name = "month_value", insertable = false, updatable = false)
-    private Integer month_value;
+    @Column(name = "month_value")
+    private Integer month;
 
     @Column(name = "local_name", nullable = false, length = 200)
     private String localName;
@@ -42,9 +43,12 @@ public class HolidayEntity {
     @Column(name = "country_code", nullable = false, length = 2)
     private String countryCode;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 15, nullable = false)
-    private HolidayType type;
+    @Column(name = "is_global", nullable = false)
+    @Builder.Default
+    private boolean isGlobal = false;
+
+    @Column(name = "launch_year")
+    private Integer launchYear;
 
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
@@ -58,11 +62,6 @@ public class HolidayEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_code", insertable = false, updatable = false)
-    private CountryEntity country;
-
 
     @PrePersist
     protected void onCreate() {
@@ -82,8 +81,39 @@ public class HolidayEntity {
 
     private void calculateYearMonth() {
         if (holidayDate != null) {
-            this.year_value = holidayDate.getYear();
-            this.month_value = holidayDate.getMonthValue();
+            this.year = holidayDate.getYear();
+            this.month = holidayDate.getMonthValue();
         }
+    }
+
+    public static Holiday toDomain(HolidayEntity entity) {
+        return Holiday.builder()
+                .id(entity.getId())
+                .date(entity.getHolidayDate())
+                .localName(entity.getLocalName())
+                .englishName(entity.getEngName())
+                .countryCode(entity.getCountryCode())
+                .global(entity.isGlobal())
+                .launchYear(entity.getLaunchYear())
+                .build();
+    }
+
+    public static List<Holiday> toDomainList(List<HolidayEntity> entities) {
+        return entities.stream().map(m -> toDomain(m)).toList();
+    }
+
+    public static HolidayEntity toEntity(Holiday domain) {
+        return HolidayEntity.builder()
+                .holidayDate(domain.getDate())
+                .localName(domain.getLocalName())
+                .engName(domain.getEnglishName())
+                .countryCode(domain.getCountryCode())
+                .isGlobal(domain.isGlobal())
+                .launchYear(domain.getLaunchYear())
+                .build();
+    }
+
+    public static List<HolidayEntity> toEntityList(List<Holiday> domainList) {
+        return domainList.stream().map(m -> HolidayEntity.toEntity(m)).toList();
     }
 }

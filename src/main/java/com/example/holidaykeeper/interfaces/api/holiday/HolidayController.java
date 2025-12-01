@@ -1,18 +1,19 @@
 package com.example.holidaykeeper.interfaces.api.holiday;
 
 
+import com.example.holidaykeeper.domain.holiday.HolidayService;
 import com.example.holidaykeeper.interfaces.api.dto.ResponseData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/holidays")
 public class HolidayController {
+
+    private final HolidayService holidayService;
 
     /**
      * 데이터 적재 기능
@@ -23,11 +24,12 @@ public class HolidayController {
     @PostMapping("/load")
     public ResponseEntity<ResponseData> load() throws Exception {
 
+        boolean result = holidayService.load();
+
         return new ResponseEntity<>(ResponseData.builder()
-                .isSuccess(true)
-                .code("200")
-                .data("ok")
-                .build(), HttpStatus.OK);
+                .isSuccess(result)
+                .data(result ? "ok" : "fail")
+                .build(), result ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -42,7 +44,6 @@ public class HolidayController {
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(true)
-                .code("200")
                 .data("ok")
                 .build(), HttpStatus.OK);
     }
@@ -57,7 +58,6 @@ public class HolidayController {
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(true)
-                .code("200")
                 .data("ok")
                 .build(), HttpStatus.OK);
     }
@@ -72,7 +72,6 @@ public class HolidayController {
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(true)
-                .code("200")
                 .data("ok")
                 .build(), HttpStatus.OK);
     }

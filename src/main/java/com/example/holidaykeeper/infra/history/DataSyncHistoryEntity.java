@@ -1,6 +1,6 @@
 package com.example.holidaykeeper.infra.history;
 
-import com.example.holidaykeeper.domain.history.OperationType;
+import com.example.holidaykeeper.domain.history.OperationTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +26,7 @@ public class DataSyncHistoryEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "operation_type", length = 15, nullable = false)
-    private OperationType type;
+    private OperationTypeEnum type;
 
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;

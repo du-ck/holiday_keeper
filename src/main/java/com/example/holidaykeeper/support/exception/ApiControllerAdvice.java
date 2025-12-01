@@ -1,0 +1,44 @@
+package com.example.holidaykeeper.support.exception;
+
+import com.example.holidaykeeper.interfaces.api.dto.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+@Slf4j
+public class ApiControllerAdvice {
+
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
+        log.error("[{}] ResourceNotFoundException :: {}",Thread.currentThread().getName(), e.getMessage(), e);
+        //조회결과가 없는 exception 의 경우 success = true 처리.
+        return ResponseEntity.status(404).body(new ErrorResponse(true, "404", e.getMessage()));
+    }
+
+    @ExceptionHandler(value = ApiCallFailedException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ApiCallFailedException e) {
+        log.error("[{}] ApiCallFailedException :: {}", Thread.currentThread().getName(), e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ErrorResponse(false, "503", e.getMessage()));
+    }
+
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.error("[{}] Data Integrity Violation :: {}", Thread.currentThread().getName(), e.getMessage(), e);
+
+        // unique 위반
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(false, "400",
+                "데이터 제약 조건을 위반했습니다. 이미 존재하는 값이거나 형식이 올바르지 않습니다."
+        ));
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("[{}] Unexpected Internal Server Error", Thread.currentThread().getName(), e);
+        return ResponseEntity.status(500).body(new ErrorResponse(false, "500", "예상치 못한 에러가 발생했습니다."));
+    }
+}

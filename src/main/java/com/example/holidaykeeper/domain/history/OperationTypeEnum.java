@@ -1,6 +1,6 @@
 package com.example.holidaykeeper.domain.history;
 
-public enum OperationType {
+public enum OperationTypeEnum {
     LOAD,
     REFRESH,
     DELETE

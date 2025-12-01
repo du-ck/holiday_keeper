@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Builder(toBuilder = true)
 @Getter
-public class HolidayType {
+public class County {
     private long holidayId;
-    private HolidayTypeEnum type;
+    private String code;
+    private String name;
 }

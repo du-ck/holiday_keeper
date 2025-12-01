@@ -2,5 +2,5 @@ package com.example.holidaykeeper.infra.holiday;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long> {
+public interface CountyJpaRepository extends JpaRepository<CountyEntity, Long> {
 }
