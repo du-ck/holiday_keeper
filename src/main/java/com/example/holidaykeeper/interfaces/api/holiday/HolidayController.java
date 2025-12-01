@@ -1,7 +1,7 @@
 package com.example.holidaykeeper.interfaces.api.holiday;
 
 
-import com.example.holidaykeeper.domain.holiday.HolidayService;
+import com.example.holidaykeeper.application.facade.HolidayFacade;
 import com.example.holidaykeeper.interfaces.api.dto.ResponseData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/holidays")
 public class HolidayController {
 
-    private final HolidayService holidayService;
+    private final HolidayFacade holidayFacade;
 
     /**
      * 데이터 적재 기능
@@ -24,7 +24,7 @@ public class HolidayController {
     @PostMapping("/load")
     public ResponseEntity<ResponseData> load() throws Exception {
 
-        boolean result = holidayService.load();
+        boolean result = holidayFacade.loadHolidaysWithHistory();
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(result)

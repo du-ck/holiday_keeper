@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -18,6 +19,12 @@ public class ApiControllerAdvice {
         log.error("[{}] ResourceNotFoundException :: {}",Thread.currentThread().getName(), e.getMessage(), e);
         //조회결과가 없는 exception 의 경우 success = true 처리.
         return ResponseEntity.status(404).body(new ErrorResponse(true, "404", e.getMessage()));
+    }
+
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.error("[{}] NoResourceFoundException :: {}",Thread.currentThread().getName(), e.getMessage(), e);
+        return ResponseEntity.status(404).body(new ErrorResponse(false, "404", "요청한 경로가 존재하지 않습니다."));
     }
 
     @ExceptionHandler(value = ApiCallFailedException.class)

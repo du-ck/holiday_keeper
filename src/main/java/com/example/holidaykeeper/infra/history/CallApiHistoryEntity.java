@@ -1,5 +1,6 @@
 package com.example.holidaykeeper.infra.history;
 
+import com.example.holidaykeeper.domain.history.CallApiHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,16 +21,16 @@ public class CallApiHistoryEntity {
     @Column(name = "endpoint", nullable = false, length = 500)
     private String endpoint;
 
-    @Column(name = "http_method", nullable = false)
+    @Column(name = "http_method")
     private String httpMethod;
 
-    @Column(name = "country_code", nullable = false)
+    @Column(name = "country_code")
     private String countryCode;
 
-    @Column(name = "request_year", nullable = false)
+    @Column(name = "request_year")
     private Integer requestYear;
 
-    @Column(name = "request_params", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "request_params", columnDefinition = "TEXT")
     private String requestParams;
 
     @Column(name = "response_status")
@@ -56,5 +57,35 @@ public class CallApiHistoryEntity {
         if (createdAt == null) {
             createdAt = now;
         }
+    }
+
+    public static CallApiHistory toDomain(CallApiHistoryEntity entity) {
+        return CallApiHistory.builder()
+                .endpoint(entity.getEndpoint())
+                .httpMethod(entity.getHttpMethod())
+                .countryCode(entity.getCountryCode())
+                .requestYear(entity.getRequestYear())
+                .requestParams(entity.getRequestParams())
+                .responseStatus(entity.getResponseStatus())
+                .responseBody(entity.getResponseBody())
+                .responseTimeMs(entity.getResponseTimeMs())
+                .isSuccess(entity.isSuccess())
+                .errorMessage(entity.getErrorMessage())
+                .build();
+    }
+
+    public static CallApiHistoryEntity toEntity(CallApiHistory domain) {
+        return CallApiHistoryEntity.builder()
+                .endpoint(domain.getEndpoint())
+                .httpMethod(domain.getHttpMethod())
+                .countryCode(domain.getCountryCode())
+                .requestYear(domain.getRequestYear())
+                .requestParams(domain.getRequestParams())
+                .responseStatus(domain.getResponseStatus())
+                .responseBody(domain.getResponseBody())
+                .responseTimeMs(domain.getResponseTimeMs())
+                .isSuccess(domain.isSuccess())
+                .errorMessage(domain.getErrorMessage())
+                .build();
     }
 }

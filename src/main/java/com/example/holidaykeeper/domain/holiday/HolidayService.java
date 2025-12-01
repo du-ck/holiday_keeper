@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,28 +23,27 @@ public class HolidayService {
 
     private final HolidayApiCaller holidayApiCaller;
 
-    public boolean load() throws Exception {
+    public record HolidayLoadResult(List<Country> countries, List<Holiday> holidays) {}
 
-        long startTime = System.currentTimeMillis();
+    /**
+     * 국가 정보 로드
+     */
+    public List<Country> loadCountries() throws Exception {
+        return holidayApiCaller.loadCountries();
+    }
 
-        List<Country> countries = holidayApiCaller.loadCountries();
-        List<Holiday> uniqueHolidays = holidayApiCaller.loadHolidays();
-
-        saveHolidaysToDatabase(countries, uniqueHolidays);
-
-        long duration = System.currentTimeMillis() - startTime;
-
-        log.info("Holidays Total: {}, Duration: {}ms ({}s)",
-                uniqueHolidays.size(), duration, duration / 1000);
-
-        return true;
+    /**
+     * 공휴일 정보 로드
+     */
+    public List<Holiday> loadHolidays() throws Exception {
+        return holidayApiCaller.loadHolidays();
     }
 
     /**
      * 공휴일 정보 목록을 받아 DB에 저장한다.
+     * 호출하는곳에서 @Transactional 적용
      */
-    @Transactional
-    public boolean saveHolidaysToDatabase(List<Country> countries, List<Holiday> holidays) {
+    public List<Holiday> saveHolidaysToDatabase(List<Country> countries, List<Holiday> holidays) {
 
         // 국가코드 정보 저장
         // 국가코드는 따로 isDeleted 처리 X, load 시에만 전체 삭제 후 saveAll
@@ -99,9 +100,7 @@ public class HolidayService {
         if (!holidayTypes.isEmpty()) {
             holidayTypeRepository.saveAll(holidayTypes);
         }
-
-        return true;
-
+        return dbResult;
     }
 }
 
