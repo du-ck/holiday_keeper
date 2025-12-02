@@ -103,7 +103,7 @@ public class HolidayFacade {
      * 특정 연도·국가 데이터를 재호출하여 Upsert (덮어쓰기) 가능
      */
     @Transactional
-    public List<RefreshHolidayFacade.Response> refreshHoliday(RefreshHolidayFacade.Request req) throws Exception {
+    public boolean refreshHoliday(RefreshHolidayFacade.Request req) throws Exception {
 
         log.info("공휴일 데이터 재동기화 시작");
         LocalDateTime startedAt = LocalDateTime.now();
@@ -122,21 +122,15 @@ public class HolidayFacade {
         holidayService.deleteHolidayData(holidayIds);
 
         // holiday data 저장
-        holidayService.saveHolidaysToDatabase(List.of(), holidays);
+        List<Holiday> results = holidayService.saveHolidaysToDatabase(List.of(), holidays);
 
         // datasync history 이력 남겨야함 refresh로.
         List<DataSyncHistory> syncHistories = createSyncHistories(holidays, startedAt, OperationTypeEnum.REFRESH);
         historyService.saveSyncHistories(syncHistories);
 
-        List<HolidayDetail> result = holidayService.searchHoliday(SearchHolidayDomain.Request.builder()
-                        .year(req.getYear())
-                        .countryCode(req.getCountryCode())
-                        .size(holidays.size())
-                        .build()
-        );
 
         log.info("공휴일 데이터 재동기화 완료");
-        return RefreshHolidayFacade.toFacadeDtoList(result);
+        return results.size() > 0;
     }
 
     /**

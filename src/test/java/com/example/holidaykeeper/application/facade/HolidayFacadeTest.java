@@ -210,9 +210,9 @@ class HolidayFacadeTest {
         //holidayService.searchHoliday
         given(holidayService.searchHoliday(any(SearchHolidayDomain.Request.class))).willReturn(searchHolidayResult);
 
-        List<RefreshHolidayFacade.Response> result = holidayFacade.refreshHoliday(req);
+        boolean result = holidayFacade.refreshHoliday(req);
 
-        assertEquals(2, result.size(), "결과는 2개가 나와야합니다");
+        assertTrue(result);
     }
 
     @Test

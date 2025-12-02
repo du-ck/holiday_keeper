@@ -66,11 +66,11 @@ public class HolidayController {
     @PutMapping("/refresh")
     public ResponseEntity<ResponseData> refresh(@Valid @RequestBody RefreshHoliday.Request req) throws Exception {
 
-        List<RefreshHolidayFacade.Response> result = holidayFacade.refreshHoliday(RefreshHoliday.toFacadeDto(req));
+        boolean result = holidayFacade.refreshHoliday(RefreshHoliday.toFacadeDto(req));
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(true)
-                .data(result)
+                .data(result ? "ok" : "fail")
                 .build(), HttpStatus.OK);
     }
 
