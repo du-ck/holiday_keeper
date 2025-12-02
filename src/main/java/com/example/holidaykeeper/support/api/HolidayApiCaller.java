@@ -30,6 +30,8 @@ public class HolidayApiCaller {
      * Nager API에서 최근 5년 동안의 모든 공휴일 정보를 병렬로 로드 후 중복 제거
      */
     public List<Holiday> loadHolidays() throws Exception {
+        log.info("[Nager Api] 공휴일 데이터 요청");
+
         // 국가코드 조회
         List<Country> countries = nagerApi.getAvailableCountries();
 
@@ -89,6 +91,7 @@ public class HolidayApiCaller {
      * Nager API에서 국가코드 로드
      */
     public List<Country> loadCountries() {
+        log.info("[Nager Api] 국가코드 데이터 요청");
         return nagerApi.getAvailableCountries();
     }
 
@@ -98,6 +101,7 @@ public class HolidayApiCaller {
      * year, countryCode 기준
      */
     public List<Holiday> loadHolidays(int year, String countryCode) {
+        log.info("[Nager Api] 공휴일 데이터 요청");
         List<Holiday> holidays = nagerApi.getPublicHolidays(year, countryCode);
 
         //중복 제거 (countryCode, date, englishName, localName 조건)

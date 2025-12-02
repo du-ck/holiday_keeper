@@ -35,6 +35,7 @@ public class HolidayFacade {
     @Transactional
     public boolean loadHolidaysWithHistory() throws Exception {
         LocalDateTime startedAt = LocalDateTime.now();
+        log.info("공휴일 데이터 저장 시작");
 
         //HolidayService를 통한 데이터 로드
         List<Country> countries = holidayService.loadCountries();
@@ -50,6 +51,7 @@ public class HolidayFacade {
         List<DataSyncHistory> syncHistories = createSyncHistories(holidays, startedAt, OperationTypeEnum.LOAD);
         historyService.saveSyncHistories(syncHistories);
 
+        log.info("공휴일 데이터 저장 완료");
         return true;
     }
 
@@ -59,7 +61,7 @@ public class HolidayFacade {
      */
     public List<DataSyncHistory> createSyncHistories(List<Holiday> holidays, LocalDateTime startedAt,
                                                      OperationTypeEnum operationType) {
-
+        log.info("데이터 변경이력 생성 시작");
         // 국가코드-연도 조합을 중복 제거하여 수집
         Set<String> countryYearSet = holidays.stream()
                 .map(h -> h.getCountryCode() + "-" + h.getDate().getYear())
@@ -80,7 +82,7 @@ public class HolidayFacade {
                             .build();
                 })
                 .collect(Collectors.toList());
-
+        log.info("데이터 변경이력 생성 완료");
         return histories;
     }
 
@@ -88,7 +90,9 @@ public class HolidayFacade {
      * Holiday 조회
      */
     public List<SearchHolidayFacade.Response> searchHoliday(SearchHolidayFacade.Request req) throws Exception {
+        log.info("공휴일 데이터 조회 시작");
         List<HolidayDetail> results = holidayService.searchHoliday(SearchHolidayFacade.toDomainDto(req));
+        log.info("공휴일 데이터 조회 완료");
         return SearchHolidayFacade.toFacadeDtoList(results);
     }
 
@@ -99,6 +103,8 @@ public class HolidayFacade {
      */
     @Transactional
     public List<RefreshHolidayFacade.Response> refreshHoliday(RefreshHolidayFacade.Request req) throws Exception {
+
+        log.info("공휴일 데이터 재동기화 시작");
         LocalDateTime startedAt = LocalDateTime.now();
 
         // 연도, 국가 기준으로 nager api 호출.
@@ -128,6 +134,7 @@ public class HolidayFacade {
                         .build()
         );
 
+        log.info("공휴일 데이터 재동기화 완료");
         return RefreshHolidayFacade.toFacadeDtoList(result);
     }
 
@@ -137,6 +144,7 @@ public class HolidayFacade {
      */
     @Transactional
     public boolean deleteHoliday(DeleteHolidayFacade.Request req) {
+        log.info("공휴일 데이터 삭제 시작");
         LocalDateTime startedAt = LocalDateTime.now();
         int intYear = req.getYear().intValue();
 
@@ -152,7 +160,7 @@ public class HolidayFacade {
 
         List<DataSyncHistory> syncHistories = createSyncHistories(alreadyData, startedAt, OperationTypeEnum.DELETE);
         historyService.saveSyncHistories(syncHistories);
-
+        log.info("공휴일 데이터 삭제 완료");
         return true;
     }
 }

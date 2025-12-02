@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_FILE_NAME" value="app"/>
+
+    <!-- 로그 패턴 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n"/>
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Rolling File Appender: 로그를 파일에 저장하고 일별마다 파일 교체 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 로그 파일이 저장될 경로와 파일명 -->
+        <file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
+
+        <!-- 롤링 정책: 시간(일별) 및 최대 파일 수 기준 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 롤링된 파일명 패턴: app-2025-12-02.log.gz 형태로 저장 -->
+            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 최대 보관 일수: 30일 (이후 자동 삭제) -->
+            <maxHistory>30</maxHistory>
+            <!-- 파일 하나당 최대 크기 -->
+            <maxFileSize>100MB</maxFileSize>
+        </rollingPolicy>
+
+        <!-- 인코더 설정 -->
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 4. Root Logger 설정: 전체 애플리케이션에 대한 기본 로그 레벨과 Appender 지정 -->
+    <root level="INFO">
+        <!-- 콘솔에 출력 -->
+        <appender-ref ref="CONSOLE"/>
+        <!-- 파일에 저장 -->
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
