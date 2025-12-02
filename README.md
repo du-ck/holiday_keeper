@@ -23,6 +23,7 @@
 - **JUnit 5**
 - **SpringDoc OpenAPI 3** (Swagger)
 - **Gradle 8.9**
+- **GitHub Actions CI**
 
 ---
 
