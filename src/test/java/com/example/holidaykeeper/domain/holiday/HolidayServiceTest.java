@@ -2,8 +2,9 @@ package com.example.holidaykeeper.domain.holiday;
 
 import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
 import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
-import com.example.holidaykeeper.interfaces.api.holiday.SearchHoliday;
+import com.example.holidaykeeper.interfaces.api.dto.SearchHoliday;
 import com.example.holidaykeeper.support.api.HolidayApiCaller;
+import com.example.holidaykeeper.support.exception.ApiCallFailedException;
 import com.example.holidaykeeper.support.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -261,5 +260,18 @@ public class HolidayServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> holidayService.searchHoliday(req));
+    }
+
+    @Test
+    @DisplayName("refresh 기능 중 nager api 데이터가 없을 경우")
+    void refresh_nager_NoData() throws Exception {
+        int year = 2025;
+        String countryCode = "KR";
+
+        given(holidayApiCaller.loadHolidays(year, countryCode))
+                .willReturn(Collections.emptyList());
+
+        assertThrows(ApiCallFailedException.class,
+                () -> holidayService.loadHolidays(year, countryCode));
     }
 }

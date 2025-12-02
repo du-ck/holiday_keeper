@@ -1,4 +1,4 @@
-package com.example.holidaykeeper.interfaces.api.dto;
+package com.example.holidaykeeper.interfaces.api.dto.response;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,10 +1,9 @@
 package com.example.holidaykeeper.application.facade;
 
-import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
+import com.example.holidaykeeper.application.facade.request.RefreshHolidayFacade;
 import com.example.holidaykeeper.domain.history.HistoryService;
 import com.example.holidaykeeper.domain.holiday.*;
-import com.example.holidaykeeper.interfaces.api.holiday.SearchHoliday;
-import com.example.holidaykeeper.support.api.HolidayApiCaller;
+import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
 import com.example.holidaykeeper.support.exception.ApiCallFailedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +13,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import static org.mockito.ArgumentMatchers.any;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +43,7 @@ class HolidayFacadeTest {
     private List<Country> testCountries;
     private List<Holiday> testHolidays;
     private List<Holiday> dbHolidaysResult;
+    private List<HolidayDetail> searchHolidayResult;
 
 
     @BeforeEach
@@ -98,6 +102,34 @@ class HolidayFacadeTest {
                 .build();
 
         dbHolidaysResult = Arrays.asList(dbHolidayKR, dbHolidayUS);
+
+        HolidayDetail holidayDetail1 = HolidayDetail.builder()
+                .id(1L)
+                .holidayDate(LocalDate.of(2025, 6, 6))
+                .engName("Memorial Day")
+                .localName("현충일")
+                .countryCode("KR")
+                .countryName("South Korea")
+                .isGlobal(true)
+                .types(Arrays.asList(HolidayTypeEnum.PUBLIC))
+                .launchYear(null)
+                .countyNames(List.of())
+                .build();
+
+        HolidayDetail holidayDetail2 = HolidayDetail.builder()
+                .id(1L)
+                .holidayDate(LocalDate.of(2025, 8, 15))
+                .engName("Liberation Day")
+                .localName("광복절")
+                .countryCode("KR")
+                .countryName("South Korea")
+                .isGlobal(true)
+                .types(Arrays.asList(HolidayTypeEnum.PUBLIC))
+                .launchYear(null)
+                .countyNames(List.of())
+                .build();
+
+        searchHolidayResult = Arrays.asList(holidayDetail1, holidayDetail2);
     }
 
     @Test
@@ -154,4 +186,31 @@ class HolidayFacadeTest {
         verify(historyService).saveSyncHistories(anyList());
     }
 
+
+    @Test
+    @DisplayName("refresh 로직 정상기능 테스트")
+    void refresh() throws Exception {
+        int year = 2025;
+        String countryCode = "KR";
+
+        RefreshHolidayFacade.Request req = RefreshHolidayFacade.Request.builder()
+                .year(year)
+                .countryCode(countryCode)
+                .build();
+
+        given(holidayService.loadHolidays(year, countryCode))
+                .willReturn(testHolidays);
+        given(holidayService.searchHolidayIds(year, countryCode))
+                .willReturn(testHolidays);
+
+        given(holidayService.saveHolidaysToDatabase(List.of(), testHolidays))
+                .willReturn(dbHolidaysResult);
+
+        //holidayService.searchHoliday
+        given(holidayService.searchHoliday(any(SearchHolidayDomain.Request.class))).willReturn(searchHolidayResult);
+
+        List<RefreshHolidayFacade.Response> result = holidayFacade.refreshHoliday(req);
+
+        assertEquals(2, result.size(), "결과는 2개가 나와야합니다");
+    }
 }

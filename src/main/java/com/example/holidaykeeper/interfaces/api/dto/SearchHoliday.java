@@ -1,8 +1,8 @@
-package com.example.holidaykeeper.interfaces.api.holiday;
+package com.example.holidaykeeper.interfaces.api.dto;
 
 import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
-import com.example.holidaykeeper.domain.holiday.Holiday;
 import com.example.holidaykeeper.domain.holiday.HolidayTypeEnum;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,7 +23,9 @@ public class SearchHoliday {
         private List<HolidayTypeEnum> types = Collections.singletonList(HolidayTypeEnum.PUBLIC);
         private String countryCode;
 
+        @Pattern(regexp = "^\\d{6}$")
         private String fromDate; // from~to 필터용
+        @Pattern(regexp = "^\\d{6}$")
         private String toDate;   // from~to 필터용
 
         private boolean isGlobal = true;

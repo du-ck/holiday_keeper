@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // Q-Type Import (QueryDSL이 생성한 Q 클래스)
 import static com.example.holidaykeeper.infra.holiday.QHolidayEntity.holidayEntity;
@@ -53,7 +52,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         // 동적 검색 조건
         builder.and(yearEq(req.getYear()));
         builder.and(monthEq(req.getMonth()));
-        builder.and(coutryCodeEq(req.getCountryCode()));
+        builder.and(countryCodeEq(req.getCountryCode()));
         builder.and(dateBetween(req.getFromDate(), req.getToDate()));
 
         // types 조건은 서브쿼리로 처리
@@ -114,6 +113,17 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         return true;
     }
 
+    @Override
+    public int delete(List<Long> ids) {
+        int result = jpaRepository.updateIsDeletedTrue(ids);
+        return result;
+    }
+
+    @Override
+    public List<Holiday> searchHolidayIds(int year, String countryCode) {
+        return HolidayEntity.toDomainList(jpaRepository.findByYearAndCountryCode(year, countryCode));
+    }
+
     private BooleanExpression yearEq(Integer year) {
         return year != null ?  holidayEntity.year.eq(year) : null;
     }
@@ -126,7 +136,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         return month != null ? holidayEntity.month.eq(month) : null;
     }
 
-    private BooleanExpression coutryCodeEq(String countryCode) {
+    private BooleanExpression countryCodeEq(String countryCode) {
         return countryCode != null ? holidayEntity.countryCode.eq(countryCode) : null;
     }
 

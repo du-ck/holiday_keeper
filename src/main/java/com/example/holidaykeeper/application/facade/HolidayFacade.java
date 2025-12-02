@@ -1,5 +1,6 @@
 package com.example.holidaykeeper.application.facade;
 
+import com.example.holidaykeeper.application.facade.request.RefreshHolidayFacade;
 import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
 import com.example.holidaykeeper.domain.history.DataSyncHistory;
 import com.example.holidaykeeper.domain.history.HistoryService;
@@ -39,9 +40,7 @@ public class HolidayFacade {
         List<Holiday> holidays = holidayService.loadHolidays();
 
         // 기존 데이터 delete 처리 (소프트 딜리트)
-        holidayService.deleteHolidayTypeAll();
-        holidayService.deleteCountyAll();
-        holidayService.deleteHolidayAll();
+        holidayService.deleteHolidayDataAll();
 
         // Holiday 저장
         holidayService.saveHolidaysToDatabase(countries, holidays);
@@ -49,7 +48,6 @@ public class HolidayFacade {
         // HistoryService 를 통한 이력 생성 및 저장
         List<DataSyncHistory> syncHistories = createSyncHistories(holidays, startedAt, OperationTypeEnum.LOAD);
         historyService.saveSyncHistories(syncHistories);
-
 
         return true;
     }
@@ -91,5 +89,44 @@ public class HolidayFacade {
     public List<SearchHolidayFacade.Response> searchHoliday(SearchHolidayFacade.Request req) throws Exception {
         List<HolidayDetail> results = holidayService.searchHoliday(SearchHolidayFacade.toDomainDto(req));
         return SearchHolidayFacade.toFacadeDtoList(results);
+    }
+
+    /**
+     * 재동기화(Refresh) 기능
+     *
+     * 특정 연도·국가 데이터를 재호출하여 Upsert (덮어쓰기) 가능
+     */
+    @Transactional
+    public List<RefreshHolidayFacade.Response> refreshHoliday(RefreshHolidayFacade.Request req) throws Exception {
+        LocalDateTime startedAt = LocalDateTime.now();
+
+        // 연도, 국가 기준으로 nager api 호출.
+        List<Holiday> holidays = holidayService.loadHolidays(req.getYear(), req.getCountryCode());
+
+        // 연도, 국가 parameter 기준으로 해당조건의 기존 데이터 조회
+        List<Holiday> alreadyData = holidayService.searchHolidayIds(req.getYear(), req.getCountryCode());
+
+        List<Long> holidayIds = alreadyData.stream()
+                .map(m -> m.getId())
+                .collect(Collectors.toList());
+
+        // holiday, holiday Type, county 소프트딜리트
+        holidayService.deleteHolidayData(holidayIds);
+
+        // holiday data 저장
+        holidayService.saveHolidaysToDatabase(List.of(), holidays);
+
+        // datasync history 이력 남겨야함 refresh로.
+        List<DataSyncHistory> syncHistories = createSyncHistories(holidays, startedAt, OperationTypeEnum.REFRESH);
+        historyService.saveSyncHistories(syncHistories);
+
+        List<HolidayDetail> result = holidayService.searchHoliday(SearchHolidayDomain.Request.builder()
+                        .year(req.getYear())
+                        .countryCode(req.getCountryCode())
+                        .size(holidays.size())
+                        .build()
+        );
+
+        return RefreshHolidayFacade.toFacadeDtoList(result);
     }
 }

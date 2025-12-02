@@ -3,6 +3,7 @@ package com.example.holidaykeeper.domain.holiday;
 
 import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
 import com.example.holidaykeeper.support.api.HolidayApiCaller;
+import com.example.holidaykeeper.support.exception.ApiCallFailedException;
 import com.example.holidaykeeper.support.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +26,18 @@ public class HolidayService {
 
     private final HolidayApiCaller holidayApiCaller;
 
-    public boolean deleteCountyAll() {
-        return countyRepository.deleteAll();
+    public boolean deleteHolidayDataAll() {
+        countyRepository.deleteAll();
+        holidayTypeRepository.deleteAll();
+        holidayRepository.deleteAll();
+        return true;
     }
 
-    public boolean deleteHolidayTypeAll() {
-        return holidayTypeRepository.deleteAll();
-    }
-
-    public boolean deleteHolidayAll() {
-        return holidayRepository.deleteAll();
+    public boolean deleteHolidayData(List<Long> holidayIds) {
+        holidayRepository.delete(holidayIds);
+        holidayTypeRepository.delete(holidayIds);
+        countyRepository.delete(holidayIds);
+        return true;
     }
 
     public List<HolidayDetail> searchHoliday(SearchHolidayDomain.Request req) throws Exception {
@@ -78,19 +81,43 @@ public class HolidayService {
         return finalResults;
     }
 
+    public List<Holiday> searchHolidayIds(int year, String countryCode) {
+        return holidayRepository.searchHolidayIds(year, countryCode);
+    }
+
 
     /**
      * 국가 정보 로드
      */
     public List<Country> loadCountries() throws Exception {
-        return holidayApiCaller.loadCountries();
+        List<Country> result = holidayApiCaller.loadCountries();
+        if (result.isEmpty()) {
+            throw new ApiCallFailedException("API 통신결과가 없습니다.");
+        }
+        return result;
     }
 
     /**
      * 공휴일 정보 로드
      */
     public List<Holiday> loadHolidays() throws Exception {
-        return holidayApiCaller.loadHolidays();
+        List<Holiday> result = holidayApiCaller.loadHolidays();
+        if (result.isEmpty()) {
+            throw new ApiCallFailedException("API 통신결과가 없습니다.");
+        }
+        return result;
+    }
+
+    /**
+     * 공휴일 정보 로드 (year, countryCode 기준)
+     */
+    public List<Holiday> loadHolidays(Integer year, String countryCode) throws Exception {
+        int intYear = year.intValue();
+        List<Holiday> result = holidayApiCaller.loadHolidays(intYear, countryCode);
+        if (result.isEmpty()) {
+            throw new ApiCallFailedException("API 통신결과가 없습니다.");
+        }
+        return result;
     }
 
     /**
@@ -101,8 +128,10 @@ public class HolidayService {
 
         // 국가코드 정보 저장
         // 국가코드는 따로 isDeleted 처리 X, load 시에만 전체 삭제 후 saveAll
-        countryRepository.deleteAll();
-        countryRepository.saveAll(countries);
+        if (!countries.isEmpty()) {
+            countryRepository.deleteAll();
+            countryRepository.saveAll(countries);
+        }
 
         // holiday_id를 가져오기 위함.
         List<Holiday> dbResult = holidayRepository.saveAll(holidays);

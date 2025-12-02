@@ -8,4 +8,5 @@ public interface CountyRepository {
 
     List<County> findByHolidayIdIn(List<Long> holidayIds);
     boolean deleteAll();
+    int delete(List<Long> ids);
 }

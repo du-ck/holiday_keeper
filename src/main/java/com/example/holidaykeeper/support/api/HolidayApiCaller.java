@@ -91,4 +91,26 @@ public class HolidayApiCaller {
     public List<Country> loadCountries() {
         return nagerApi.getAvailableCountries();
     }
+
+
+    /**
+     * Nager API에서 공휴일정보 로드
+     * year, countryCode 기준
+     */
+    public List<Holiday> loadHolidays(int year, String countryCode) {
+        List<Holiday> holidays = nagerApi.getPublicHolidays(year, countryCode);
+
+        //중복 제거 (countryCode, date, englishName, localName 조건)
+        List<Holiday> uniqueHolidays = new ArrayList<>(
+                holidays.stream()
+                        .collect(Collectors.toMap(
+                                h -> h.getCountryCode() + "|" + h.getDate() + "|" + h.getEnglishName() + "|" + h.getLocalName(),
+                                h -> h,
+                                (existing, replacement) -> existing
+                        ))
+                        .values()
+        );
+
+        return uniqueHolidays;
+    }
 }

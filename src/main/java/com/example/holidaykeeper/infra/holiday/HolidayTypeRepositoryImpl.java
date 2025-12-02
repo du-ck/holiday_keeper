@@ -36,4 +36,10 @@ public class HolidayTypeRepositoryImpl implements HolidayTypeRepository {
         entityManager.clear();
         return true;
     }
+
+    @Override
+    public int delete(List<Long> ids) {
+        int result = jpaRepository.updateIsDeletedTrue(ids);
+        return result;
+    }
 }

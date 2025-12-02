@@ -36,4 +36,10 @@ public class CountyRepositoryImpl implements CountyRepository {
         return true;
     }
 
+    @Override
+    public int delete(List<Long> ids) {
+        int result = jpaRepository.updateIsDeletedTrue(ids);
+        return result;
+    }
+
 }
