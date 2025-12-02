@@ -139,7 +139,7 @@ class HolidayFacadeTest {
 
         given(holidayService.loadCountries())
                 .willReturn(testCountries);
-        given(holidayService.loadHolidays())
+        given(holidayService.loadHolidays(5))
                 .willReturn(testHolidays);
 
         given(holidayService.saveHolidaysToDatabase(testCountries, testHolidays))
@@ -171,7 +171,7 @@ class HolidayFacadeTest {
 
         given(holidayService.loadCountries())
                 .willReturn(Collections.emptyList());
-        given(holidayService.loadHolidays())
+        given(holidayService.loadHolidays(5))
                 .willReturn(Collections.emptyList());
 
         given(holidayService.saveHolidaysToDatabase(anyList(), anyList()))

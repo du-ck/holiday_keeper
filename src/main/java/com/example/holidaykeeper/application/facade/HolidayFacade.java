@@ -34,12 +34,13 @@ public class HolidayFacade {
      */
     @Transactional
     public boolean loadHolidaysWithHistory() throws Exception {
+        int recentYear = 5;
         LocalDateTime startedAt = LocalDateTime.now();
         log.info("공휴일 데이터 저장 시작");
 
         //HolidayService를 통한 데이터 로드
         List<Country> countries = holidayService.loadCountries();
-        List<Holiday> holidays = holidayService.loadHolidays();
+        List<Holiday> holidays = holidayService.loadHolidays(recentYear);
 
         // 기존 데이터 delete 처리 (소프트 딜리트)
         holidayService.deleteHolidayDataAll();

@@ -1,4 +1,10 @@
 spring:
+  batch:
+    jdbc:
+      #Spring Batch에 필요한 테이블을 자동 생성
+      initialize-schema: always
+    job:
+      enabled: false
   application:
     name: holidaykeeper
   datasource:

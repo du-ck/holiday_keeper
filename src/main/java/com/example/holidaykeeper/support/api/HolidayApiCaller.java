@@ -29,15 +29,15 @@ public class HolidayApiCaller {
     /**
      * Nager API에서 최근 5년 동안의 모든 공휴일 정보를 병렬로 로드 후 중복 제거
      */
-    public List<Holiday> loadHolidays() throws Exception {
-        log.info("[Nager Api] 공휴일 데이터 요청");
+    public List<Holiday> loadHolidays(int recentYear) throws Exception {
 
         // 국가코드 조회
         List<Country> countries = nagerApi.getAvailableCountries();
 
-        // 최근 5년 연도 계산
+        // 최근 n년 연도 계산
+        // recentYear = 5 라면 2025, 2024, 2023, 2022, 2021
         int currentYear = LocalDate.now().getYear();
-        List<Integer> recent5Years = IntStream.rangeClosed(0, 4)
+        List<Integer> recentYears = IntStream.rangeClosed(0, recentYear - 1)
                 .map(i -> currentYear - i)
                 .boxed()
                 .collect(Collectors.toList());
@@ -46,8 +46,9 @@ public class HolidayApiCaller {
         // 병렬 처리: holiday 정보들을 병렬처리로 호출하여 저장한다.
         List<CompletableFuture<List<Holiday>>> futures = new ArrayList<>();
 
+        log.info("[Nager Api] 공휴일 데이터 요청");
         for (Country country : countries) {
-            for (int year : recent5Years) {
+            for (int year : recentYears) {
                 CompletableFuture<List<Holiday>> future = CompletableFuture.supplyAsync(
                         () -> nagerApi.getPublicHolidays(year, country.getCode()),
                         holidayLoadExecutor

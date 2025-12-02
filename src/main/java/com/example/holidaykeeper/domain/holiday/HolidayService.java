@@ -100,8 +100,8 @@ public class HolidayService {
     /**
      * 공휴일 정보 로드
      */
-    public List<Holiday> loadHolidays() throws Exception {
-        List<Holiday> result = holidayApiCaller.loadHolidays();
+    public List<Holiday> loadHolidays(int recentYear) throws Exception {
+        List<Holiday> result = holidayApiCaller.loadHolidays(recentYear);
         if (result.isEmpty()) {
             throw new ApiCallFailedException("API 통신결과가 없습니다.");
         }
