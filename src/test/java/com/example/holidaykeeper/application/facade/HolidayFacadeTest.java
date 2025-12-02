@@ -1,5 +1,6 @@
 package com.example.holidaykeeper.application.facade;
 
+import com.example.holidaykeeper.application.facade.request.DeleteHolidayFacade;
 import com.example.holidaykeeper.application.facade.request.RefreshHolidayFacade;
 import com.example.holidaykeeper.domain.history.HistoryService;
 import com.example.holidaykeeper.domain.holiday.*;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -26,6 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -212,5 +213,28 @@ class HolidayFacadeTest {
         List<RefreshHolidayFacade.Response> result = holidayFacade.refreshHoliday(req);
 
         assertEquals(2, result.size(), "결과는 2개가 나와야합니다");
+    }
+
+    @Test
+    @DisplayName("delete 로직 정상기능 테스트")
+    void delete() {
+        int year = 2025;
+        String countryCode = "KR";
+
+        DeleteHolidayFacade.Request req = DeleteHolidayFacade.Request.builder()
+                .year(year)
+                .countryCode(countryCode)
+                .build();
+
+        given(holidayService.searchHolidayIds(year, countryCode))
+                .willReturn(testHolidays);
+
+        given(holidayService.deleteHolidayData(anyList()))
+                .willReturn(true);
+
+        boolean result = holidayFacade.deleteHoliday(req);
+
+        assertTrue(result);
+        verify(holidayService, times(1)).deleteHolidayData(anyList());
     }
 }

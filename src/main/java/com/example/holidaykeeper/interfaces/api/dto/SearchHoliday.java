@@ -28,24 +28,10 @@ public class SearchHoliday {
         @Pattern(regexp = "^\\d{6}$")
         private String toDate;   // from~to 필터용
 
-        private boolean isGlobal = true;
+        private Boolean isGlobal;
 
         private int page = 0; // 요청 페이지 번호 (0부터 시작)
         private int size = 10; // 페이지당 항목 수
-    }
-
-    @Builder
-    @Getter
-    public static class Response {
-        private LocalDate holidayDate;
-        private String countryCode;
-        private String countryName;
-        private String localName;
-        private String englishName;
-        private boolean global;
-        private Integer launchYear;
-        private List<String> countyNames;
-        private List<HolidayTypeEnum> types;
     }
 
     public static SearchHolidayFacade.Request toFacadeDto(SearchHoliday.Request dto) {
@@ -65,7 +51,7 @@ public class SearchHoliday {
                 .countryCode(dto.getCountryCode())
                 .fromDate(fromDate)
                 .toDate(toDate)
-                .isGlobal(dto.isGlobal())
+                .isGlobal(dto.getIsGlobal() == null ? true : false)
                 .page(dto.getPage())
                 .size(dto.getSize())
                 .build();

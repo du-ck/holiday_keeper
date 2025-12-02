@@ -1,5 +1,6 @@
 package com.example.holidaykeeper.application.facade;
 
+import com.example.holidaykeeper.application.facade.request.DeleteHolidayFacade;
 import com.example.holidaykeeper.application.facade.request.RefreshHolidayFacade;
 import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
 import com.example.holidaykeeper.domain.history.DataSyncHistory;
@@ -128,5 +129,30 @@ public class HolidayFacade {
         );
 
         return RefreshHolidayFacade.toFacadeDtoList(result);
+    }
+
+    /**
+     * 삭제 기능
+     * 특정 연도, 국가코드 기준으로 삭제 기능
+     */
+    @Transactional
+    public boolean deleteHoliday(DeleteHolidayFacade.Request req) {
+        LocalDateTime startedAt = LocalDateTime.now();
+        int intYear = req.getYear().intValue();
+
+        // 연도, 국가 parameter 기준으로 해당조건의 기존 데이터 조회
+        List<Holiday> alreadyData = holidayService.searchHolidayIds(intYear, req.getCountryCode());
+
+        List<Long> holidayIds = alreadyData.stream()
+                .map(m -> m.getId())
+                .collect(Collectors.toList());
+
+        // holiday, holiday Type, county 소프트딜리트
+        holidayService.deleteHolidayData(holidayIds);
+
+        List<DataSyncHistory> syncHistories = createSyncHistories(alreadyData, startedAt, OperationTypeEnum.DELETE);
+        historyService.saveSyncHistories(syncHistories);
+
+        return true;
     }
 }

@@ -52,6 +52,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         // 동적 검색 조건
         builder.and(yearEq(req.getYear()));
         builder.and(monthEq(req.getMonth()));
+        builder.and(globalEq(req.isGlobal()));
         builder.and(countryCodeEq(req.getCountryCode()));
         builder.and(dateBetween(req.getFromDate(), req.getToDate()));
 
@@ -121,7 +122,8 @@ public class HolidayRepositoryImpl implements HolidayRepository {
 
     @Override
     public List<Holiday> searchHolidayIds(int year, String countryCode) {
-        return HolidayEntity.toDomainList(jpaRepository.findByYearAndCountryCode(year, countryCode));
+        // isDeleted = false만 처리
+        return HolidayEntity.toDomainList(jpaRepository.findByYearAndCountryCodeAndIsDeleted(year, countryCode, false));
     }
 
     private BooleanExpression yearEq(Integer year) {

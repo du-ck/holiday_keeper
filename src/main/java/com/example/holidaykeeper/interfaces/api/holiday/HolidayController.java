@@ -4,6 +4,7 @@ package com.example.holidaykeeper.interfaces.api.holiday;
 import com.example.holidaykeeper.application.facade.HolidayFacade;
 import com.example.holidaykeeper.application.facade.request.RefreshHolidayFacade;
 import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
+import com.example.holidaykeeper.interfaces.api.dto.DeleteHoliday;
 import com.example.holidaykeeper.interfaces.api.dto.RefreshHoliday;
 import com.example.holidaykeeper.interfaces.api.dto.SearchHoliday;
 import com.example.holidaykeeper.interfaces.api.dto.response.ResponseData;
@@ -78,11 +79,13 @@ public class HolidayController {
      *
      * 특정 연도·국가의 공휴일 레코드 전체 삭제
      */
-    @DeleteMapping("/{year}/{countryCode}")
-    public ResponseEntity<ResponseData> delete() throws Exception {
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseData> delete(@Valid @ModelAttribute DeleteHoliday.Request req) throws Exception {
+
+        boolean result = holidayFacade.deleteHoliday(DeleteHoliday.toFacadeDto(req));
 
         return new ResponseEntity<>(ResponseData.builder()
-                .isSuccess(true)
+                .isSuccess(result)
                 .data("ok")
                 .build(), HttpStatus.OK);
     }

@@ -18,5 +18,5 @@ public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long>
             "where h.id IN :ids")
     int updateIsDeletedTrue(@Param("ids") List<Long> ids);
 
-    List<HolidayEntity> findByYearAndCountryCode(int year, String countryCode);
+    List<HolidayEntity> findByYearAndCountryCodeAndIsDeleted(int year, String countryCode, boolean isDeleted);
 }
