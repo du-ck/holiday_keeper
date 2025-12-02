@@ -207,9 +207,6 @@ class HolidayFacadeTest {
         given(holidayService.saveHolidaysToDatabase(List.of(), testHolidays))
                 .willReturn(dbHolidaysResult);
 
-        //holidayService.searchHoliday
-        given(holidayService.searchHoliday(any(SearchHolidayDomain.Request.class))).willReturn(searchHolidayResult);
-
         boolean result = holidayFacade.refreshHoliday(req);
 
         assertTrue(result);
