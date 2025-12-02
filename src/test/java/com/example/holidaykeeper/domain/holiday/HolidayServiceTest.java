@@ -1,6 +1,10 @@
 package com.example.holidaykeeper.domain.holiday;
 
+import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
+import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
+import com.example.holidaykeeper.interfaces.api.holiday.SearchHoliday;
 import com.example.holidaykeeper.support.api.HolidayApiCaller;
+import com.example.holidaykeeper.support.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,11 +14,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -44,6 +55,7 @@ public class HolidayServiceTest {
     private List<Country> testCountries;
     private List<Holiday> testHolidays;
     private List<Holiday> dbHolidaysResult;
+    private List<HolidayDetail> searchHolidayResult;
 
     @BeforeEach
     void setUp() {
@@ -101,6 +113,35 @@ public class HolidayServiceTest {
                 .build();
 
         dbHolidaysResult = Arrays.asList(dbHolidayKR, dbHolidayUS);
+
+
+        HolidayDetail holidayDetail1 = HolidayDetail.builder()
+                .id(1L)
+                .holidayDate(LocalDate.of(2025, 6, 6))
+                .engName("Memorial Day")
+                .localName("현충일")
+                .countryCode("KR")
+                .countryName("South Korea")
+                .isGlobal(true)
+                .types(Arrays.asList(HolidayTypeEnum.PUBLIC))
+                .launchYear(null)
+                .countyNames(List.of())
+                .build();
+
+        HolidayDetail holidayDetail2 = HolidayDetail.builder()
+                .id(1L)
+                .holidayDate(LocalDate.of(2025, 8, 15))
+                .engName("Liberation Day")
+                .localName("광복절")
+                .countryCode("KR")
+                .countryName("South Korea")
+                .isGlobal(true)
+                .types(Arrays.asList(HolidayTypeEnum.PUBLIC))
+                .launchYear(null)
+                .countyNames(List.of())
+                .build();
+
+        searchHolidayResult = Arrays.asList(holidayDetail1, holidayDetail2);
     }
 
     @Test
@@ -137,5 +178,88 @@ public class HolidayServiceTest {
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> holidayService.saveHolidaysToDatabase(testCountries, testHolidays));
+    }
+
+
+    @Test
+    @DisplayName("Holiday 조회로직 정상작동 테스트")
+    void searchHoliday() throws Exception {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
+        int page = 0;
+        int size = 10;
+
+        LocalDate fromDate = YearMonth.parse("202506", formatter).atDay(1);
+        LocalDate toDate = YearMonth.parse("202508", formatter).atEndOfMonth();
+
+        List<HolidayTypeEnum> types = Collections.singletonList(HolidayTypeEnum.PUBLIC);
+        SearchHolidayFacade.Request req = new SearchHolidayFacade.Request(null, null, types,
+                "KR", fromDate, toDate, false, page, size);
+
+        SearchHolidayDomain.Request domainReq = SearchHolidayFacade.toDomainDto(req);
+        Pageable pageable = PageRequest.of(domainReq.getPage(), domainReq.getSize());
+
+        Page<HolidayDetail> result = new PageImpl<>(
+                searchHolidayResult,
+                pageable,
+                2L
+        );
+
+        given(holidayRepository.searchHolidays(domainReq, pageable))
+                .willReturn(result);
+        given(countyRepository.findByHolidayIdIn(anyList())).willReturn(List.of());
+        given(holidayTypeRepository.findByHolidayIdIn(anyList())).willReturn(List.of());
+
+
+        List<HolidayDetail> test = holidayService.searchHoliday(domainReq);
+        assertEquals(2, test.size(), "결과는 2개가 나와야합니다");
+    }
+
+    /**
+     * parameter가 하나도 안들어와도
+     * 기본값 설정 > 전체조회 형태로 정상 진행되야함
+     * (page = 0, size = 10, type = PUBLIC, global = true)
+     */
+    @Test
+    @DisplayName("parameter 모두 null")
+    void searchHoliday_parameter_null() throws Exception {
+        SearchHoliday.Request searchDto = new SearchHoliday.Request();  //여기서 기본값 설정됨.
+        SearchHolidayDomain.Request req = SearchHolidayFacade.toDomainDto(SearchHoliday.toFacadeDto(searchDto));
+
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
+
+        Page<HolidayDetail> searchResult = new PageImpl<>(
+                searchHolidayResult,
+                pageable,
+                2L
+        );
+
+        given(holidayRepository.searchHolidays(req, pageable))
+                .willReturn(searchResult);
+        given(countyRepository.findByHolidayIdIn(anyList())).willReturn(List.of());
+        given(holidayTypeRepository.findByHolidayIdIn(anyList())).willReturn(List.of());
+
+        List<HolidayDetail> test = holidayService.searchHoliday(req);
+        assertEquals(2, test.size(), "결과는 2개가 나와야합니다");
+    }
+
+    @Test
+    @DisplayName("조회결과 없으면 ResourceNotFoundException 발생")
+    void search_resourceNotFound() throws Exception {
+        SearchHoliday.Request searchDto = new SearchHoliday.Request();  //여기서 기본값 설정됨.
+        SearchHolidayDomain.Request req = SearchHolidayFacade.toDomainDto(SearchHoliday.toFacadeDto(searchDto));
+
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
+
+        Page<HolidayDetail> searchResult = new PageImpl<>(
+                List.of(),
+                pageable,
+                0L
+        );
+
+        given(holidayRepository.searchHolidays(req, pageable))
+                .willReturn(searchResult);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> holidayService.searchHoliday(req));
     }
 }

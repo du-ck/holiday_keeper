@@ -5,4 +5,5 @@ import java.util.List;
 public interface HolidayTypeRepository {
 
     List<HolidayType> saveAll(List<HolidayType> holidayTypes);
+    List<HolidayType> findByHolidayIdIn(List<Long> holidayIds);
 }

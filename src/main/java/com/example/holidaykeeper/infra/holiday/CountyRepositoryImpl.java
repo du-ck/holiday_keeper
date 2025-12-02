@@ -18,4 +18,10 @@ public class CountyRepositoryImpl implements CountyRepository {
         return CountyEntity.toDomainList(savedEntities);
     }
 
+    @Override
+    public List<County> findByHolidayIdIn(List<Long> holidayIds) {
+        List<CountyEntity> results = jpaRepository.findByHolidayIdIn(holidayIds);
+        return CountyEntity.toDomainList(results);
+    }
+
 }

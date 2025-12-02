@@ -18,7 +18,12 @@ import java.util.List;
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_holiday",
                 columnNames = {"country_code", "holiday_date", "eng_name", "local_name", "is_deleted"}
-        ))
+        ),
+        indexes = {
+                // 복합 인덱스  year_value, month_value, country_code 순서
+                @Index(name = "idx_holiday_ymc", columnList = "year_value, month_value, country_code")
+        }
+)
 public class HolidayEntity {
     @Id
     @Column(name = "id")

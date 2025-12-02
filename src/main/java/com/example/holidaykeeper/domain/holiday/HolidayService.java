@@ -1,13 +1,15 @@
 package com.example.holidaykeeper.domain.holiday;
 
 
+import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
 import com.example.holidaykeeper.support.api.HolidayApiCaller;
-import jakarta.transaction.Transactional;
+import com.example.holidaykeeper.support.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,47 @@ public class HolidayService {
 
     private final HolidayApiCaller holidayApiCaller;
 
-    public record HolidayLoadResult(List<Country> countries, List<Holiday> holidays) {}
+    public List<HolidayDetail> searchHoliday(SearchHolidayDomain.Request req) throws Exception {
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
+
+        // Holiday 정보
+        List<HolidayDetail> result = holidayRepository.searchHolidays(req, pageable).getContent();
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        List<Long> holidayIds = result.stream()
+                .map(HolidayDetail::getId)
+                .collect(Collectors.toList());
+
+        //holiday_id를 기준으로 county, type 값 가져오기
+        List<County> counties = countyRepository.findByHolidayIdIn(holidayIds);
+        List<HolidayType> types = holidayTypeRepository.findByHolidayIdIn(holidayIds);
+
+        // County 매핑
+        Map<Long, List<String>> countyMap = counties.stream()
+                .collect(Collectors.groupingBy(
+                        County::getHolidayId,
+                        Collectors.mapping(County::getName, Collectors.toList())
+                ));
+
+        // Type 매핑
+        Map<Long, List<HolidayTypeEnum>> typeMap = types.stream()
+                .collect(Collectors.groupingBy(
+                        HolidayType::getHolidayId,
+                        Collectors.mapping(HolidayType::getType, Collectors.toList())
+                ));
+
+
+        List<HolidayDetail> finalResults = result.stream()
+                .map(detail -> detail.toBuilder()
+                        .countyNames(countyMap.getOrDefault(detail.getId(), List.of()))
+                        .types(typeMap.getOrDefault(detail.getId(), List.of()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return finalResults;
+    }
+
 
     /**
      * 국가 정보 로드

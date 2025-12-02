@@ -1,11 +1,14 @@
 package com.example.holidaykeeper.application.facade;
 
+import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
 import com.example.holidaykeeper.domain.history.DataSyncHistory;
 import com.example.holidaykeeper.domain.history.HistoryService;
 import com.example.holidaykeeper.domain.history.OperationTypeEnum;
 import com.example.holidaykeeper.domain.holiday.Country;
 import com.example.holidaykeeper.domain.holiday.Holiday;
+import com.example.holidaykeeper.domain.holiday.HolidayDetail;
 import com.example.holidaykeeper.domain.holiday.HolidayService;
+import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -73,5 +76,10 @@ public class HolidayFacade {
                 .collect(Collectors.toList());
 
         return histories;
+    }
+
+    public List<SearchHolidayFacade.Response> searchHoliday(SearchHolidayFacade.Request req) throws Exception {
+        List<HolidayDetail> results = holidayService.searchHoliday(SearchHolidayFacade.toDomainDto(req));
+        return SearchHolidayFacade.toFacadeDtoList(results);
     }
 }

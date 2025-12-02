@@ -2,11 +2,16 @@ package com.example.holidaykeeper.interfaces.api.holiday;
 
 
 import com.example.holidaykeeper.application.facade.HolidayFacade;
+import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
+import com.example.holidaykeeper.domain.holiday.Holiday;
+import com.example.holidaykeeper.domain.holiday.HolidayDetail;
 import com.example.holidaykeeper.interfaces.api.dto.ResponseData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,11 +45,13 @@ public class HolidayController {
      * 결과는 페이징 형태로 응답
      */
     @GetMapping("")
-    public ResponseEntity<ResponseData> holidays() throws Exception {
+    public ResponseEntity<ResponseData> holidays(SearchHoliday.Request req) throws Exception {
+
+        List<SearchHolidayFacade.Response> results = holidayFacade.searchHoliday(SearchHoliday.toFacadeDto(req));
 
         return new ResponseEntity<>(ResponseData.builder()
                 .isSuccess(true)
-                .data("ok")
+                .data(results)
                 .build(), HttpStatus.OK);
     }
 

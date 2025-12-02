@@ -18,4 +18,10 @@ public class HolidayTypeRepositoryImpl implements HolidayTypeRepository {
         List<HolidayTypeEntity> savedEntities = jpaRepository.saveAll(HolidayTypeEntity.toEntityList(holidayTypes));
         return HolidayTypeEntity.toDomainList(savedEntities);
     }
+
+    @Override
+    public List<HolidayType> findByHolidayIdIn(List<Long> holidayIds) {
+        List<HolidayTypeEntity> results = jpaRepository.findByHolidayIdIn(holidayIds);
+        return HolidayTypeEntity.toDomainList(results);
+    }
 }

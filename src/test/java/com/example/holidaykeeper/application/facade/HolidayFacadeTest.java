@@ -1,7 +1,9 @@
 package com.example.holidaykeeper.application.facade;
 
+import com.example.holidaykeeper.application.facade.request.SearchHolidayFacade;
 import com.example.holidaykeeper.domain.history.HistoryService;
 import com.example.holidaykeeper.domain.holiday.*;
+import com.example.holidaykeeper.interfaces.api.holiday.SearchHoliday;
 import com.example.holidaykeeper.support.api.HolidayApiCaller;
 import com.example.holidaykeeper.support.exception.ApiCallFailedException;
 import org.junit.jupiter.api.Assertions;
@@ -98,10 +100,8 @@ class HolidayFacadeTest {
         dbHolidaysResult = Arrays.asList(dbHolidayKR, dbHolidayUS);
     }
 
-    /**
-     * 핵심로직 정상기능 테스트
-     */
     @Test
+    @DisplayName("load로직 정상기능 테스트")
     void load() throws Exception {
 
         given(holidayService.loadCountries())
