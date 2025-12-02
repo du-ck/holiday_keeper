@@ -7,4 +7,5 @@ public interface CountyRepository {
     List<County> saveAll(List<County> counties);
 
     List<County> findByHolidayIdIn(List<Long> holidayIds);
+    boolean deleteAll();
 }

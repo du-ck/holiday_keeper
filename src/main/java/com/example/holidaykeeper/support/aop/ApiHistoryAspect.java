@@ -12,12 +12,15 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
 @Aspect
@@ -84,7 +87,6 @@ public class ApiHistoryAspect {
             historyBuilder.responseBody(truncateBody(responseBody, 500)); // 500자 제한 예시
 
         } catch (Exception e) {
-
             exception = e;
 
             int status = 500;
@@ -92,8 +94,18 @@ public class ApiHistoryAspect {
 
             if (exception instanceof ResourceNotFoundException) {
                 status = 404;
+                errorMsg = "해당하는 데이터가 없습니다.";
             } else if (exception instanceof ApiCallFailedException) {
                 status = 503;
+            } else if (exception instanceof NoResourceFoundException) {
+                status = 404;
+                errorMsg = "요청한 경로가 존재하지 않습니다.";
+            } else if (exception instanceof DataIntegrityViolationException) {
+                status = 400;
+                errorMsg = "데이터 제약 조건을 위반했습니다. 이미 존재하는 값이거나 형식이 올바르지 않습니다.";
+            } else if (exception instanceof MethodArgumentNotValidException) {
+                status = 400;
+                errorMsg = "요청 정보가 올바르지 않습니다.";
             }
 
             historyBuilder.isSuccess(false)

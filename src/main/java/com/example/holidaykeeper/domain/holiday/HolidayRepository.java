@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface HolidayRepository {
     List<Holiday> saveAll(List<Holiday> holidays);
-
     Page<HolidayDetail> searchHolidays(SearchHolidayDomain.Request req, Pageable pageable);
+
+    boolean deleteAll();
 }

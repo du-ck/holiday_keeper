@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +34,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
 
     private final HolidayJpaRepository jpaRepository;
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
 
     @Override
     public List<Holiday> saveAll(List<Holiday> holidays) {
@@ -100,6 +102,16 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 .fetchCount();
 
         return new PageImpl<>(content, pageable, totalCount);
+    }
+
+    /**
+     * 대량이라 JPQL로 처리
+     */
+    @Override
+    public boolean deleteAll() {
+        jpaRepository.updateAllIsDeletedTrue();
+        entityManager.clear();
+        return true;
     }
 
     private BooleanExpression yearEq(Integer year) {

@@ -25,6 +25,18 @@ public class HolidayService {
 
     private final HolidayApiCaller holidayApiCaller;
 
+    public boolean deleteCountyAll() {
+        return countyRepository.deleteAll();
+    }
+
+    public boolean deleteHolidayTypeAll() {
+        return holidayTypeRepository.deleteAll();
+    }
+
+    public boolean deleteHolidayAll() {
+        return holidayRepository.deleteAll();
+    }
+
     public List<HolidayDetail> searchHoliday(SearchHolidayDomain.Request req) throws Exception {
         Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
 

@@ -34,9 +34,16 @@ public class HolidayFacade {
     public boolean loadHolidaysWithHistory() throws Exception {
         LocalDateTime startedAt = LocalDateTime.now();
 
-        //HolidayService를 통한 데이터 로드 및 저장
+        //HolidayService를 통한 데이터 로드
         List<Country> countries = holidayService.loadCountries();
         List<Holiday> holidays = holidayService.loadHolidays();
+
+        // 기존 데이터 delete 처리 (소프트 딜리트)
+        holidayService.deleteHolidayTypeAll();
+        holidayService.deleteCountyAll();
+        holidayService.deleteHolidayAll();
+
+        // Holiday 저장
         holidayService.saveHolidaysToDatabase(countries, holidays);
 
         // HistoryService 를 통한 이력 생성 및 저장
@@ -78,6 +85,9 @@ public class HolidayFacade {
         return histories;
     }
 
+    /**
+     * Holiday 조회
+     */
     public List<SearchHolidayFacade.Response> searchHoliday(SearchHolidayFacade.Request req) throws Exception {
         List<HolidayDetail> results = holidayService.searchHoliday(SearchHolidayFacade.toDomainDto(req));
         return SearchHolidayFacade.toFacadeDtoList(results);

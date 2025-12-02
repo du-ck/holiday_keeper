@@ -24,12 +24,6 @@ public class CallApiHistoryEntity {
     @Column(name = "http_method")
     private String httpMethod;
 
-    @Column(name = "country_code")
-    private String countryCode;
-
-    @Column(name = "request_year")
-    private Integer requestYear;
-
     @Column(name = "request_params", columnDefinition = "TEXT")
     private String requestParams;
 
@@ -63,8 +57,6 @@ public class CallApiHistoryEntity {
         return CallApiHistory.builder()
                 .endpoint(entity.getEndpoint())
                 .httpMethod(entity.getHttpMethod())
-                .countryCode(entity.getCountryCode())
-                .requestYear(entity.getRequestYear())
                 .requestParams(entity.getRequestParams())
                 .responseStatus(entity.getResponseStatus())
                 .responseBody(entity.getResponseBody())
@@ -78,8 +70,6 @@ public class CallApiHistoryEntity {
         return CallApiHistoryEntity.builder()
                 .endpoint(domain.getEndpoint())
                 .httpMethod(domain.getHttpMethod())
-                .countryCode(domain.getCountryCode())
-                .requestYear(domain.getRequestYear())
                 .requestParams(domain.getRequestParams())
                 .responseStatus(domain.getResponseStatus())
                 .responseBody(domain.getResponseBody())

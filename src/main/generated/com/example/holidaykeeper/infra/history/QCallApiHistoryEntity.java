@@ -19,8 +19,6 @@ public class QCallApiHistoryEntity extends EntityPathBase<CallApiHistoryEntity> 
 
     public static final QCallApiHistoryEntity callApiHistoryEntity = new QCallApiHistoryEntity("callApiHistoryEntity");
 
-    public final StringPath countryCode = createString("countryCode");
-
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final StringPath endpoint = createString("endpoint");
@@ -34,8 +32,6 @@ public class QCallApiHistoryEntity extends EntityPathBase<CallApiHistoryEntity> 
     public final BooleanPath isSuccess = createBoolean("isSuccess");
 
     public final StringPath requestParams = createString("requestParams");
-
-    public final NumberPath<Integer> requestYear = createNumber("requestYear", Integer.class);
 
     public final StringPath responseBody = createString("responseBody");
 

@@ -1,6 +1,7 @@
 package com.example.holidaykeeper.infra.holiday;
 
 import com.example.holidaykeeper.domain.holiday.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public class CountyRepositoryImpl implements CountyRepository {
 
     private final CountyJpaRepository jpaRepository;
+    private final EntityManager entityManager;
 
     @Override
     public List<County> saveAll(List<County> counties) {
@@ -22,6 +24,16 @@ public class CountyRepositoryImpl implements CountyRepository {
     public List<County> findByHolidayIdIn(List<Long> holidayIds) {
         List<CountyEntity> results = jpaRepository.findByHolidayIdIn(holidayIds);
         return CountyEntity.toDomainList(results);
+    }
+
+    /**
+     * 대량이라 JPQL로 처리
+     */
+    @Override
+    public boolean deleteAll() {
+        jpaRepository.updateAllIsDeletedTrue();
+        entityManager.clear();
+        return true;
     }
 
 }
