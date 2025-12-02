@@ -5,6 +5,7 @@ import com.example.holidaykeeper.domain.holiday.HolidayType;
 import com.example.holidaykeeper.domain.holiday.HolidayTypeEnum;
 import com.example.holidaykeeper.domain.holiday.request.SearchHolidayDomain;
 import com.example.holidaykeeper.infra.holiday.HolidayTypeEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -34,17 +35,35 @@ public class SearchHolidayFacade {
         private int size;
     }
 
+    @Schema(description = "공휴일 검색 결과정보를 담는 DTO")
     @Builder
     @Getter
     public static class Response {
+        @Schema(description = "공휴일 날짜", example = "2025-08-15")
         private LocalDate holidayDate;
+
+        @Schema(description = "국가 코드", example = "KR")
         private String countryCode;
+
+        @Schema(description = "국가 이름", example = "South Korea")
         private String countryName;
+
+        @Schema(description = "지역 이름", example = "광복절")
         private String localName;
+
+        @Schema(description = "영어 이름", example = "Liberation Day")
         private String englishName;
+
+        @Schema(description = "전역 여부", example = "true", defaultValue = "true")
         private boolean global;
+
+        @Schema(description = "시행 날짜", example = "null")
         private Integer launchYear;
+
+        @Schema(description = "자치주")
         private List<String> countyNames;
+
+        @Schema(description = "공휴일 타입", example = "PUBLIC", allowableValues = {"PUBLIC", "BANK", "SCHOOL", "AUTHORITIES", "OPTIONAL", "OBSERVANCE"})
         private List<HolidayTypeEnum> types;
     }
 

@@ -31,6 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc' // Jdbc, Driver
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     implementation 'com.h2database:h2' // h2 : implementation
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 

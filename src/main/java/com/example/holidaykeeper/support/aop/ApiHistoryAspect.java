@@ -59,6 +59,15 @@ public class ApiHistoryAspect {
         // 요청 정보 추출
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
+        // Swagger 및 정적 리소스 요청 무시
+        if (request.getRequestURI().contains("/v3/api-docs") ||
+                request.getRequestURI().contains("/swagger-ui/") ||
+                request.getRequestURI().equals("/swagger-ui.html")) {
+
+            // Swagger 관련 요청일 경우 스킵
+            return joinPoint.proceed();
+        }
+
         CallApiHistory.CallApiHistoryBuilder historyBuilder = CallApiHistory.builder()
                 .endpoint(request.getRequestURI())
                 .httpMethod(request.getMethod());
