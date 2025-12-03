@@ -23,6 +23,7 @@
 - **JUnit 5**
 - **SpringDoc OpenAPI 3** (Swagger)
 - **Gradle 8.9**
+- **Spring Batch**
 - **GitHub Actions CI**
 
 ---
@@ -375,6 +376,29 @@ public class ApiControllerAdvice {
     public ResponseEntity<ResponseData> handleValidationExceptions(...) {
         // 검증 실패 시 일관된 응답 형식
     }
+}
+```
+
+### 8. Spring Batch
+
+Spring Batch를 통해 매년 1월 2일 01:00 KST에 공휴일 데이터 불러오도록 설정
+
+```java
+/**
+ * 매년 1월 2일 01:00 KST에 실행
+ * cron: 초 분 시 일 월 요일
+ */
+@Scheduled(cron = "0 0 1 2 1 ?", zone = "Asia/Seoul")
+public void runHolidayLoadJob() throws Exception {
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    log.info("HolidayLoadJob 스케줄 실행 - startedAt={}", now);
+
+    JobParameters params = new JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .addString("triggeredAt", now.toString())
+            .toJobParameters();
+
+    jobLauncher.run(holidayLoadJob(), params);
 }
 ```
 
